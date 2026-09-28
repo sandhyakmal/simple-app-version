@@ -1,7 +1,7 @@
 FROM node:20-alpine AS build
 
-ENV HTTP_PROXY=http://inetgw2-proxy.corp.bi.go.id:8080
-ENV HTTPS_PROXY=http://inetgw2-proxy.corp.bi.go.id:8080
+# ENV HTTP_PROXY=http://inetgw2-proxy.corp.bi.go.id:8080
+# ENV HTTPS_PROXY=http://inetgw2-proxy.corp.bi.go.id:8080
 
 WORKDIR /app
 COPY package*.json ./
