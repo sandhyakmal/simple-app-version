@@ -12,7 +12,7 @@ pipeline {
     }
 
     environment {
-        APP_NAME       = 'simple-app-version'
+        APP_VERSION    = '1.0.0'
         IMAGE          = 'simple-app-version'
         CONTAINER_NAME = 'simple-app-version'
         HOST_PORT      = '8081'          // 8080 dipakai Jenkins
@@ -26,25 +26,10 @@ pipeline {
             }
         }
 
-        stage('Set Version') {
-            steps {
-                script {
-                    def pkgVersion = sh(
-                        script: '''sed -n 's/.*"version": *"\\([^"]*\\)".*/\\1/p' package.json | head -1''',
-                        returnStdout: true
-                    ).trim()
-                    env.APP_VERSION = "${pkgVersion}-${env.BUILD_NUMBER}"
-                    echo "Versi yang akan dibuild: ${env.APP_VERSION}"
-                }
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 sh '''
                     docker build \
-                      --build-arg APP_VERSION="${APP_VERSION}" \
-                      --build-arg APP_NAME="${APP_NAME}" \
                       -t ${IMAGE}:${APP_VERSION} \
                       -t ${IMAGE}:latest .
                 '''
