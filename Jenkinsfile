@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     options {
         timestamps()
         disableConcurrentBuilds()
@@ -29,9 +33,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                    docker build \
-                      -t ${IMAGE}:${APP_VERSION} \
-                      -t ${IMAGE}:latest .
+                    docker build -t ${IMAGE}:latest .
                 '''
             }
         }
