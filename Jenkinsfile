@@ -18,6 +18,7 @@ pipeline {
     environment {
         APP_VERSION    = '1.0.0'
         IMAGE          = 'simple-app-version'
+        IMAGE_REPO     = 'andaraleonhart/simple-app-version'
         CONTAINER_NAME = 'simple-app-version'
         HOST_PORT      = '8081'          // 8080 dipakai Jenkins
         DOCKER_BUILDKIT = '0'            // legacy builder, sesuai setup sebelumnya
@@ -38,28 +39,22 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            when { expression { return params.DEPLOY } }
+        stage('Docker Tag') {
             steps {
                 sh '''
-                    docker rm -f ${CONTAINER_NAME} || true
-                    docker run -d \
-                      --name ${CONTAINER_NAME} \
-                      --restart unless-stopped \
-                      -p ${HOST_PORT}:8080 \
-                      ${IMAGE}:${APP_VERSION}
+                    docker tag ${IMAGE}:latest ${IMAGE_REPO}:${APP_VERSION}
                 '''
             }
         }
 
-        stage('Health Check') {
-            when { expression { return params.DEPLOY } }
+        stage('Docker Push') {
             steps {
-                sh '''
-                    sleep 5
-                    curl -fsS http://localhost:${HOST_PORT}/ > /dev/null
-                    echo "Aplikasi merespons di port ${HOST_PORT}"
-                '''
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh '''
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker push ${IMAGE_REPO}:${APP_VERSION}
+                    '''
+                }
             }
         }
     }
